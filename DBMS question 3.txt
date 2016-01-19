@@ -1,0 +1,151 @@
+--Question 3
+--creating dept table
+
+--A) 
+create table dept(dept_no varchar(5) primary key, name varchar2(30));
+
+
+
+--creating staff table
+create table staff(staff_no number(5) primary key, name varchar2(30), DOB date, 
+                   Gender char(1), DOJ date, designation varchar2(30),
+                   basic_pay number(5), dept_no varchar(5),
+                    constraint f_k foreign key (dept_no) references dept(dept_no),
+                    check(gender like 'M%' or gender like 'F%'));
+
+--creating skill table     
+
+
+create table Skill(skill_code varchar2(5) primary key, description varchar2(30), charge_outrate number(3), check(skill_code like 'S%'));
+
+create table staff_skill(staff_no number(5) references staff(staff_no),
+                        skill_code varchar(5) references skill(skill_code), 
+                        constraint p_k primary key(staff_no,skill_code)); 
+
+create table project (project_no varchar(5) primary key, pname varchar(5),
+                      start_date date, end_date date, 
+                      project_manager_staffno number(5) references staff(staff_no),
+                      check(project_no like 'P%') );
+create table Works (staff_no number(5) references staff(staff_no), 
+                    project_no varchar(5) references project(project_no), date_worked_on date,
+                    in_time timestamp, out_time timestamp,
+                    primary key(staff_no, project_no, date_worked_on));
+                    
+                    
+                    
+--b) Inserting date for dept table
+
+
+insert into dept values('D001', 'IT and CS');
+insert into dept values('D002', 'Civil');
+insert into dept values('D003', 'Electronics and Electrical');
+insert into dept values('D004', 'Mechanical');
+insert into dept values('D005', 'Bio-medical and Bio-technology');
+insert into dept values('D006', 'Management sciences');
+
+
+select * from dept;
+
+
+
+insert into staff values (1, 'Padma', '07-OCT-91','F','11-NOV-14', 'Asst.Professor', 20000,'D001');
+insert into staff values (2, 'Kala', '20-MAR-81','F','12-JAN-11', 'Asst.Professor', 20000,'D001');
+insert into staff values (3, 'DEVA', '02-APR-61','M','12-JAN-11', 'Professor', 30000,'D002');
+insert into staff values (4, 'DEIVANAI', '02-FEB-53','F','12-JAN-89', 'Professor', 30000,'D003');
+insert into staff values (5, 'GUGHA', '22-DEC-93','F','12-SEP-09', 'Professor', 30000,'D004');
+insert into staff values (6, 'BENITHA', '03-SEP-76','F','19-AUG-92', 'Asst.Professor', 20000,'D004');
+insert into staff values (7, 'SWATHI', '14-JAN-90','F','12-MAR-12', 'Asst.Professor', 20000,'D005');
+insert into staff values (8, 'KALYANI', '20-MAR-81','F','19-AUG-12', 'Asst.Professor', 20000,'D005');
+insert into staff values (9, 'RUDRESH', '05-MAY-76','M','12-JUN-92', 'Professor', 30000,'D001');
+insert into staff values (10, 'KRISHNAN', '19-JUL-89','M','31-DEC-13', 'Asst.Professor', 20000,'D006');
+insert into staff values (11, 'Swati', '02-APR-82','M','12-JAN-12', 'Asst.Professor', 20000,'D002');
+insert into staff values(12,'Deepti','03-JUL-90','F','11-NOV-11','Asst. Professor', 2000,'D001');
+insert into staff values(13,'Kalakar','03-JUL-93','F','11-NOV-15','Asst. Professor', 2000,'D001');
+insert into staff values (14, 'Trishur', '29-JAN-71','M','29-FEB-08', 'Asst.Professor', 20000,'D001');
+
+
+insert into skill values ('S001', 'Programming languages and DBMS' , 50);
+insert into skill values ('S002', 'Software core subjects' , 30);
+insert into skill values ('S003', 'Discrete Maths' , 60);
+insert into skill values ('S004', 'Core Civil Subjects' , 80);
+insert into skill values ('S005', 'Microprocessor and instruments' , 90);
+insert into skill values ('S006','Arhitecture,Hardware,networks',70);
+insert into skill values ('S007', 'Core Bio and med instruments', 95);
+insert into skill values ('S008','Management', 85);
+
+
+
+
+
+
+insert into staff_skill values(1,'S001');
+insert into staff_skill values(1,'S002');
+insert into staff_skill values(1,'S005');
+insert into staff_skill values(2,'S001');
+insert into staff_skill values(9,'S002');
+insert into staff_skill values(3,'S004');
+insert into staff_skill values(11,'S004');
+insert into staff_skill values(4,'S005');
+insert into staff_skill values(6,'S005');
+insert into staff_skill values(5,'S006');
+insert into staff_skill values(5,'S008');
+insert into staff_skill values(5,'S005');
+insert into staff_skill values(5,'S007');
+insert into staff_skill values(10,'S008');
+insert into staff_skill values(7,'S007');
+insert into staff_skill values(8,'S007');
+insert into staff_skill values(12,'S002');
+insert into staff_skill values(12,'S008');
+insert into staff_skill values(13,'S001');
+insert into staff_skill values(13,'S008');
+insert into staff_skill values(14,'S002');
+
+select * from staff_skill;
+
+--c)
+select dept_no, count(*) "no.of staff"
+from staff
+group by dept_no;
+
+--)d)
+select * from staff
+where basic_pay<(Select avg(basic_pay) from staff);
+
+--e.a)
+select * from dept
+where dept_no in(
+select dept_no
+from staff
+group by dept_no
+having count(*)>5);
+
+
+
+--e.b)
+select  *
+from staff
+where staff_no in (select staff_no from staff_skill
+                  group by staff_no
+                  having count(skill_code)>3);
+                  
+--f)
+
+
+
+
+
+
+
+
+
+
+
+--g)
+
+create view dept_staff 
+as
+(select dept.dept_no, dept.name, count(*) "No of  Employees" , sum(basic_pay) "Total Expenditure"
+from dept join staff
+on(dept.dept_no=staff.dept_no)
+group by dept.dept_no,dept.name);
+  

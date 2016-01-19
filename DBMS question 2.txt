@@ -1,0 +1,141 @@
+create table customer (customer_no varchar(5) primary key, cname varchar(30), check(customer_no like 'C%'));
+
+select * from user_tables where table_name='CUSTOMER';
+
+create table cust_order (order_no varchar(5) primary key, order_date date, customer_no varchar(5),
+order_amt number(8) default 0, check (order_no like 'O%'),constraint fk foreign key (customer_no) references customer(customer_no) );
+
+create table item(item_no varchar(5) primary key, item_name varchar(30), unit_price number(5), check(item_no like 'I%'));
+
+create table order_item(order_no varchar(5), item_no varchar(5), qty number(3), 
+ constraint fk1 foreign key (order_no)
+references cust_order(order_no), constraint fk2 foreign key (item_no) references item(item_no), constraint pk1 primary key(order_no,item_no));
+
+
+
+insert into customer values('C1001', 'Padma');
+insert into customer values('C1002', 'Kalai');
+insert into customer values('C1003', 'Samuthra');
+insert into customer values('C1004', 'Megha');
+insert into customer values('C1005', 'Maaya');
+insert into customer values('C1006', 'Shakthi');
+insert into customer values('C1007', 'Mrilini');
+insert into customer values('C1008', 'Tribuvani');
+
+select * from customer;
+
+commit;
+
+insert into item values('I1001','Fogg perfume',300);
+insert into item values('I1002','Fogg Spray',200);
+insert into item values('I1003','Dove soap',50);
+insert into item values('I1004','Mysore sandal soap',30);
+insert into item values('I1005','Dove Shampoo',100);
+insert into item values('I1006','Head and shoulders Shampoo',75);
+insert into item values('I1007','Dove conditioner',150);
+insert into item values('I1008','Panteen conditioner',100);
+insert into item values('I1009','Indulekha oil',500);
+insert into item values('I1010','Parachute Advanced',200);
+
+
+update item
+set item_name='&it'
+where item_no='&in';
+
+select * from item;
+
+commit;
+
+
+insert into cust_order(order_no,order_date,customer_no) values('O1001',sysdate,'C1001');
+insert into cust_order(order_no,order_date,customer_no) values('O1002',to_date('01-JAN-15'),'C1002');
+insert into cust_order(order_no,order_date,customer_no) values('O1003',to_date('10-JAN-15'),'C1001');
+insert into cust_order(order_no,order_date,customer_no) values('O1004',to_date('10-OCT-15'),'C1007');
+insert into cust_order(order_no,order_date,customer_no) values('O1005',to_date('15-FEB-15'),'C1008');
+insert into cust_order(order_no,order_date,customer_no) values('O1006',to_date('23-MAY-15'),'C1005');
+insert into cust_order(order_no,order_date,customer_no) values('O1007',to_date('31-OCT-15'),'C1004');
+insert into cust_order(order_no,order_date,customer_no) values('O1008',to_date('25-DEC-15'),'C1001');
+insert into cust_order(order_no,order_date,customer_no) values('O1009',to_date('13-SEP-15'),'C1008');
+insert into cust_order(order_no,order_date,customer_no) values('O1010',to_date('28-AUG-15'),'C1006');
+insert into cust_order(order_no,order_date,customer_no) values('O1011',to_date('07-NOV-15'),'C1003');
+insert into cust_order(order_no,order_date,customer_no) values('O1012',to_date('07-NOV-15'),'C1006');
+
+SELECT * FROM CUST_ORDER;
+
+
+COMMIT;
+
+
+
+INSERT INTO ORDER_ITEM VALUES('O1001','I1005',3);
+INSERT INTO ORDER_ITEM VALUES('O1001','I1010',1);
+INSERT INTO ORDER_ITEM VALUES('O1001','I1009',2);
+INSERT INTO ORDER_ITEM VALUES('O1002','I1001',1);
+INSERT INTO ORDER_ITEM VALUES('O1002','I1002',2);
+INSERT INTO ORDER_ITEM VALUES('O1002','I1004',3);
+INSERT INTO ORDER_ITEM VALUES('O1002','I1006',4);
+INSERT INTO ORDER_ITEM VALUES('O1002','I1008',5);
+INSERT INTO ORDER_ITEM VALUES('O1003','I1009',1);
+INSERT INTO ORDER_ITEM VALUES('O1004','I1001',1);
+INSERT INTO ORDER_ITEM VALUES('O1004','I1005',1);
+INSERT INTO ORDER_ITEM VALUES('O1005','I1007',5);
+INSERT INTO ORDER_ITEM VALUES('O1006','I1001',7);
+INSERT INTO ORDER_ITEM VALUES('O1007','I1001',10);
+INSERT INTO ORDER_ITEM VALUES('O1007','I1004',20);
+INSERT INTO ORDER_ITEM VALUES('O1008','I1009',2);
+INSERT INTO ORDER_ITEM VALUES('O1008','I1006',1);
+INSERT INTO ORDER_ITEM VALUES('O1008','I1007',20);
+INSERT INTO ORDER_ITEM VALUES('O1009','I1005',10);
+INSERT INTO ORDER_ITEM VALUES('O1010','I1006',10);
+INSERT INTO ORDER_ITEM VALUES('O1010','I1007',25);
+INSERT INTO ORDER_ITEM VALUES('O1010','I1004',50);
+INSERT INTO ORDER_ITEM VALUES('O1011','I1003',9);
+INSERT INTO ORDER_ITEM VALUES('O1012','I1001',10);
+INSERT INTO ORDER_ITEM VALUES('O1012','I1005',10);
+COMMIT;
+SELECT * FROM ORDER_ITEM;
+
+
+
+SELECT * FROM ITEM WHERE UNIT_PRICE<(SELECT AVG(UNIT_PRICE) FROM ITEM);
+
+
+
+SELECT ORDER_NO,COUNT(ITEM_NO) "TOTAL PRODUCTS"
+FROM ORDER_ITEM 
+GROUP BY ORDER_NO;
+
+
+SELECT ITEM_NO,ITEM_NAME,UNIT_PRICE
+FROM ITEM WHERE ITEM_NO IN
+
+;
+
+SELECT * FROM ITEM WHERE ITEM_NO IN (SELECT ITEM_NO FROM ORDER_ITEM
+GROUP BY ITEM_NO
+HAVING COUNT(ITEM_NO)>=(SELECT (COUNT(*)/4) FROM CUST_ORDER));
+
+
+
+create or replace view sum_data as    SELECT SUM(QTY*UNIT_PRICE) "Sum_d",order_no
+                FROM (ITEM  natural join ORDER_ITEM) 
+                GROUP BY ORDER_NO;             
+                
+UPDATE CUST_ORDER outer
+ SET ORDer_AMT = (select "Sum_d" from sum_data inner  
+where outer.order_no=inner.order_no);                
+                
+                
+select * from cust_order;                
+                
+
+
+
+create view no_of_orders
+as
+select  cust_order.customer_no,customer.cname,count(order_no) "No.of orders"
+from cust_order join customer 
+on(cust_order.customer_no=customer.customer_no)
+group by cust_order.customer_no,customer.cname;
+
+
